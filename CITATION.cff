@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+title: "Kokoro TTS — Runpod Serverless worker (OpenAI-compatible)"
+message: "If you use this software, please cite it using these metadata."
+type: software
+authors:
+  - name: prilojject
+repository-code: "https://github.com/prilojject/runpod-kokoro-tts"
+url: "https://console.runpod.io/hub/prilojject/runpod-kokoro-tts"
+abstract: "Runpod Serverless worker for Kokoro-82M text-to-speech with an OpenAI-compatible /v1/audio/speech API, baked-in weights, and 54 voices in 8 languages."
+keywords:
+  - Runpod
+  - Kokoro
+  - TTS
+  - text-to-speech
+  - OpenAI-compatible
+  - Serverless
+version: "1.0.0"
+license: Apache-2.0
+date-released: "2026-11-23"

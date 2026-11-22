@@ -1,0 +1,31 @@
+# Kokoro TTS for Runpod Serverless (OpenAI-compatible)
+
+> A Runpod Hub Serverless worker for Kokoro-82M text-to-speech with an OpenAI-compatible /v1/audio/speech API. 54 voices in 8 languages, weighted voice blending, mp3/wav/flac/opus/pcm. Model weights are baked into the image, so a cold start does not download anything. A 16 GB GPU is enough. Use this when you need Kokoro TTS on Runpod, a self-hosted tts-1-style endpoint, or an OpenAI SDK-compatible speech API.
+
+Use this file to decide what to read next. Prefer the raw Markdown links. Deploy from the Runpod Hub (the console URL is live only after moderation): https://console.runpod.io/hub/prilojject/runpod-kokoro-tts
+
+Queue mode (default): POST /runsync with {"input":{"input":"...","voice":"af_heart","response_format":"mp3"}} and decode output.audio_base64. HTTP mode (WORKER_MODE=http, load-balancing endpoint or Pod): OpenAI SDK against https://<ENDPOINT_ID>.api.runpod.ai/v1. Japanese voices are not installed by default. Blackwell GPUs are not supported by this CUDA 12.4 build. This worker does not implement captioned timestamps or phoneme endpoints.
+
+## Docs
+
+- [README](https://raw.githubusercontent.com/prilojject/runpod-kokoro-tts/main/README.md): Full human and agent documentation — quick start, voices, HTTP mode, GPU guidance, FAQ, comparison
+- [AGENTS.md](https://raw.githubusercontent.com/prilojject/runpod-kokoro-tts/main/AGENTS.md): Instructions for coding agents working in this repository (tests, fake engine, paid GPU jobs)
+- [OpenAPI spec](https://raw.githubusercontent.com/prilojject/runpod-kokoro-tts/main/openapi.yaml): Machine-readable request and response schema
+- [Hub metadata](https://raw.githubusercontent.com/prilojject/runpod-kokoro-tts/main/.runpod/hub.json): Runpod Hub title, GPU pools, configuration
+- [Hub tests](https://raw.githubusercontent.com/prilojject/runpod-kokoro-tts/main/.runpod/tests.json): Official Hub test cases
+- [NOTICE](https://raw.githubusercontent.com/prilojject/runpod-kokoro-tts/main/NOTICE): Third-party licenses, including Kokoro-82M and espeak-ng
+- [LICENSE](https://raw.githubusercontent.com/prilojject/runpod-kokoro-tts/main/LICENSE): Apache-2.0 license for the worker code
+
+## Examples
+
+- [Python client](https://raw.githubusercontent.com/prilojject/runpod-kokoro-tts/main/examples/client.py): Queue-endpoint example that writes an audio file
+
+## Optional
+
+- [Project page](https://prilojject.github.io/runpod-kokoro-tts/): Landing page (GitHub Pages), also serves this file at /llms.txt
+- [Citation file](https://raw.githubusercontent.com/prilojject/runpod-kokoro-tts/main/CITATION.cff): Citation metadata
+- [GitHub repository](https://github.com/prilojject/runpod-kokoro-tts): Source, issues, releases
+- [Runpod Hub listing](https://console.runpod.io/hub/prilojject/runpod-kokoro-tts): One-click deploy (available after Hub review)
+- [Kokoro-82M model card](https://huggingface.co/hexgrad/Kokoro-82M): Upstream model, voices, and license
+- [kokoro package](https://github.com/hexgrad/kokoro): Upstream inference library
+- [Runpod pricing](https://www.runpod.io/pricing): Current Serverless and Pod GPU rates

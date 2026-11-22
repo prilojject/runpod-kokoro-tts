@@ -1,0 +1,387 @@
+# Describes handler.py (queue mode) and server.py (HTTP mode).
+openapi: 3.1.0
+info:
+  title: Kokoro TTS — Runpod Serverless worker (OpenAI-compatible)
+  version: 1.0.0
+  license:
+    name: Apache-2.0
+    identifier: Apache-2.0
+  description: API of https://github.com/prilojject/runpod-kokoro-tts . Queue mode (default) returns audio as base64 JSON
+    via /runsync or /run. HTTP mode (WORKER_MODE=http) serves the OpenAI /v1/audio/speech route with raw audio bytes, usable
+    from the official OpenAI SDK with base_url https://<ENDPOINT_ID>.api.runpod.ai/v1 .
+security:
+- bearer: []
+paths:
+  /runsync:
+    servers: &id001
+    - url: https://api.runpod.ai/v2/{endpoint_id}
+      description: Queue endpoint (default WORKER_MODE=queue)
+      variables:
+        endpoint_id:
+          default: ENDPOINT_ID
+    post:
+      operationId: synthesizeSync
+      summary: 'Queue mode: synthesize speech and wait for the result'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobRequest'
+            examples: &id002
+              speech:
+                value:
+                  input:
+                    input: Hello from Kokoro!
+                    voice: af_heart
+                    speed: 1.0
+                    response_format: mp3
+              openaiWrapper:
+                value:
+                  input:
+                    openai_route: /v1/audio/speech
+                    openai_input:
+                      model: tts-1
+                      input: Blended voice test.
+                      voice: af_bella(2)+af_sky(1)
+                      response_format: mp3
+              listVoices:
+                value:
+                  input:
+                    action: list_voices
+      responses: &id003
+        '200':
+          description: Job status; output holds the result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobStatus'
+  /run:
+    servers: *id001
+    post:
+      operationId: synthesizeAsync
+      summary: 'Queue mode: submit an async job'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobRequest'
+            examples: *id002
+      responses:
+        '200':
+          description: Queued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  status:
+                    type: string
+  /status/{job_id}:
+    servers: *id001
+    get:
+      operationId: jobStatus
+      summary: 'Queue mode: poll a job'
+      parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses: *id003
+  /v1/audio/speech:
+    servers: &id004
+    - url: https://{endpoint_id}.api.runpod.ai
+      description: Load-balancing endpoint or Pod with WORKER_MODE=http
+      variables:
+        endpoint_id:
+          default: ENDPOINT_ID
+    post:
+      operationId: createSpeech
+      summary: 'HTTP mode: OpenAI-compatible speech, returns audio bytes'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpeechRequest'
+      responses:
+        '200':
+          description: Audio
+          headers:
+            X-Audio-Duration:
+              schema:
+                type: string
+            X-Voice:
+              schema:
+                type: string
+            X-Sample-Rate:
+              schema:
+                type: string
+          content:
+            audio/mpeg:
+              schema:
+                type: string
+                contentMediaType: audio/mpeg
+            audio/wav: {}
+            audio/flac: {}
+            audio/ogg: {}
+            audio/pcm: {}
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenAIError'
+        '401':
+          description: Missing/wrong API_KEY (only when API_KEY is set)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenAIError'
+        '503':
+          description: Model still loading
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenAIError'
+  /v1/audio/voices:
+    servers: *id004
+    get:
+      operationId: listVoices
+      summary: 'HTTP mode: installed voices'
+      responses:
+        '200':
+          description: Voices
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VoiceList'
+  /v1/models:
+    servers: *id004
+    get:
+      operationId: listModels
+      summary: 'HTTP mode: models'
+      responses:
+        '200':
+          description: Models
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelList'
+  /ping:
+    servers: *id004
+    get:
+      operationId: ping
+      summary: 'HTTP mode health: 204 while loading, 200 when ready'
+      security: []
+      responses:
+        '200':
+          description: Ready
+        '204':
+          description: Loading
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      description: Runpod API key (queue / load-balancing endpoint). In HTTP mode on a Pod, API_KEY if set.
+  schemas:
+    SpeechRequest:
+      type: object
+      required:
+      - input
+      properties:
+        input:
+          type: string
+          description: 'Text to speak, up to MAX_INPUT_CHARS (default 4096). Alias: text.'
+        text:
+          type: string
+          description: Alias of input.
+        voice:
+          type: string
+          default: af_heart
+          description: Kokoro voice id (e.g. af_heart), an OpenAI alias (alloy, ash, ballad, coral, echo, fable, nova, onyx,
+            sage, shimmer, verse) or a weighted blend of up to 4 same-language voices, e.g. af_bella(2)+af_sky(1). Default
+            from DEFAULT_VOICE.
+        speed:
+          type: number
+          minimum: 0.25
+          maximum: 4.0
+          default: 1.0
+        response_format:
+          type: string
+          enum:
+          - mp3
+          - wav
+          - flac
+          - opus
+          - pcm
+          description: Default from DEFAULT_RESPONSE_FORMAT (mp3). opus = Ogg Opus; pcm = raw 16-bit LE mono 24 kHz. aac returns
+            an error.
+        model:
+          type: string
+          description: 'Optional: kokoro (aliases tts-1, tts-1-hd, gpt-4o-mini-tts, kokoro-82m, hexgrad/kokoro-82m).'
+        lang_code:
+          type: string
+          enum:
+          - a
+          - b
+          - e
+          - f
+          - h
+          - i
+          - p
+          - z
+          description: Override the G2P language; defaults to the voice prefix.
+        instructions:
+          type: string
+          description: Accepted and ignored (Kokoro has no prompt-based style control).
+    JobInput:
+      oneOf:
+      - $ref: '#/components/schemas/SpeechRequest'
+      - type: object
+        required:
+        - openai_route
+        properties:
+          openai_route:
+            type: string
+            enum:
+            - /v1/audio/speech
+            - /v1/models
+            - /v1/audio/voices
+          openai_input:
+            $ref: '#/components/schemas/SpeechRequest'
+      - type: object
+        required:
+        - action
+        properties:
+          action:
+            type: string
+            enum:
+            - list_voices
+            - list_models
+            - health
+    JobRequest:
+      type: object
+      required:
+      - input
+      properties:
+        input:
+          $ref: '#/components/schemas/JobInput'
+        webhook:
+          type: string
+          format: uri
+    JobStatus:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum:
+          - IN_QUEUE
+          - IN_PROGRESS
+          - COMPLETED
+          - FAILED
+          - CANCELLED
+          - TIMED_OUT
+        delayTime:
+          type: integer
+        executionTime:
+          type: integer
+        output:
+          oneOf:
+          - $ref: '#/components/schemas/SpeechJobOutput'
+          - $ref: '#/components/schemas/JobError'
+          - $ref: '#/components/schemas/VoiceList'
+          - $ref: '#/components/schemas/ModelList'
+          - type: object
+            description: 'health: {status, device, languages}'
+    SpeechJobOutput:
+      type: object
+      properties:
+        audio_base64:
+          type: string
+        content_type:
+          type: string
+          examples:
+          - audio/mpeg
+        format:
+          type: string
+        model:
+          type: string
+        voice:
+          type: string
+        lang_code:
+          type: string
+        speed:
+          type: number
+        sample_rate:
+          type: integer
+          examples:
+          - 24000
+        duration_seconds:
+          type: number
+        bytes:
+          type: integer
+        inference_seconds:
+          type: number
+        device:
+          type: string
+    JobError:
+      type: object
+      properties:
+        error:
+          type: string
+          description: '"<code>: <message>"'
+        error_detail:
+          type: object
+        status:
+          type: integer
+    OpenAIError:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+            type:
+              type: string
+            param:
+              type:
+              - string
+              - 'null'
+            code:
+              type: string
+    VoiceList:
+      type: object
+      properties:
+        object:
+          const: list
+        default:
+          type: string
+        data:
+          type: array
+          items:
+            type: object
+    ModelList:
+      type: object
+      properties:
+        object:
+          const: list
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              object:
+                type: string
+              owned_by:
+                type: string
