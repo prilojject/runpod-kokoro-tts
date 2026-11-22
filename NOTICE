@@ -1,0 +1,17 @@
+runpod-kokoro-tts
+Copyright 2026 prilojject
+
+This repository contains original worker code licensed under the Apache License 2.0 (see LICENSE).
+
+Third-party components (not modified, downloaded at image build time):
+
+- Kokoro-82M model weights and voice packs by hexgrad
+  https://huggingface.co/hexgrad/Kokoro-82M (revision f3ff3571791e39611d31c381e3a41a3af07b4987)
+  License: Apache License 2.0
+- kokoro and misaki Python packages by hexgrad — https://github.com/hexgrad/kokoro — Apache License 2.0
+- spaCy en_core_web_sm — MIT License
+- PyTorch — BSD-3-Clause; Runpod Python SDK — MIT; FastAPI — MIT; soundfile — BSD-3-Clause; libsndfile — LGPL-2.1
+- espeak-ng (bundled by the espeakng-loader wheel, used as a phonemizer fallback) — GPL-3.0-or-later;
+  phonemizer-fork — GPL-3.0. They are separate, unmodified programs/libraries installed from PyPI at
+  build time; their source is available at https://github.com/espeak-ng/espeak-ng and
+  https://github.com/thewh1teagle/phonemizer-fork.

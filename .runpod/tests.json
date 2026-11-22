@@ -1,0 +1,60 @@
+{
+  "tests": [
+    {
+      "name": "speech_mp3_default_voice",
+      "input": {
+        "input": "Hello from Kokoro on Runpod.",
+        "voice": "af_heart",
+        "response_format": "mp3"
+      },
+      "timeout": 120000
+    },
+    {
+      "name": "speech_wav_openai_alias_speed",
+      "input": {
+        "input": "Testing speed and an OpenAI voice alias.",
+        "voice": "alloy",
+        "speed": 1.2,
+        "response_format": "wav"
+      },
+      "timeout": 60000
+    },
+    {
+      "name": "openai_route_blend",
+      "input": {
+        "openai_route": "/v1/audio/speech",
+        "openai_input": {
+          "model": "tts-1",
+          "input": "Blended voice test.",
+          "voice": "af_bella(2)+af_sky(1)",
+          "response_format": "mp3"
+        }
+      },
+      "timeout": 60000
+    },
+    {
+      "name": "list_voices",
+      "input": {
+        "action": "list_voices"
+      },
+      "timeout": 30000
+    }
+  ],
+  "config": {
+    "gpuTypeId": "NVIDIA RTX A4000",
+    "gpuCount": 1,
+    "env": [
+      {
+        "key": "KOKORO_LANGS",
+        "value": "a,b"
+      }
+    ],
+    "allowedCudaVersions": [
+      "12.8",
+      "12.7",
+      "12.6",
+      "12.5",
+      "12.4"
+    ]
+  }
+}

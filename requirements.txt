@@ -1,0 +1,12 @@
+# torch is installed first in the Dockerfile from the CUDA 12.4 wheel index; pinned here so pip keeps it.
+torch==2.6.0
+kokoro==0.9.4
+misaki[en,zh]==0.9.4
+transformers==4.57.1
+huggingface_hub==0.36.2
+numpy==2.2.6
+soundfile==0.13.1
+runpod==2.4.0
+en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
+fastapi==0.165.0
+uvicorn==0.54.0

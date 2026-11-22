@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+
+# Model / HF caches
+models/
+hf_cache/
+.cache/
+*.pth
+*.pt
+*.safetensors
+
+# Generated audio
+*.mp3
+*.wav
+*.flac
+*.ogg
+*.opus
+*.pcm
+out/
+
+# Secrets
+.env
+*.env
+.runpod_api_key
+secrets*
+*.pem
+*.key
+
+# Editors / OS
+.idea/
+.vscode/
+.DS_Store
+
+# Internal notes
+REPORT_ru.md

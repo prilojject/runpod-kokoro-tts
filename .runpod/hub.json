@@ -1,0 +1,168 @@
+{
+  "title": "Kokoro TTS (OpenAI-compatible)",
+  "description": "Fast, lightweight text-to-speech with Kokoro-82M (Apache-2.0). OpenAI /v1/audio/speech compatible: 50+ voices in 8 languages, voice blending, speed control, mp3/wav/flac/opus/pcm output. Weights are baked into the image for short cold starts on 16 GB GPUs.",
+  "type": "serverless",
+  "category": "audio",
+  "iconUrl": "https://raw.githubusercontent.com/prilojject/runpod-kokoro-tts/main/.runpod/icon.png",
+  "config": {
+    "runsOn": "GPU",
+    "containerDiskInGb": 15,
+    "gpuCount": 1,
+    "gpuIds": "AMPERE_16,AMPERE_24,ADA_24",
+    "allowedCudaVersions": [
+      "12.8",
+      "12.7",
+      "12.6",
+      "12.5",
+      "12.4"
+    ],
+    "presets": [
+      {
+        "name": "English (US) — mp3",
+        "defaults": {
+          "DEFAULT_VOICE": "af_heart",
+          "DEFAULT_RESPONSE_FORMAT": "mp3",
+          "KOKORO_LANGS": "a,b"
+        }
+      },
+      {
+        "name": "Multilingual — wav",
+        "defaults": {
+          "DEFAULT_VOICE": "af_heart",
+          "DEFAULT_RESPONSE_FORMAT": "wav",
+          "KOKORO_LANGS": "a,b,e,f,h,i,p,z"
+        }
+      }
+    ],
+    "env": [
+      {
+        "key": "DEFAULT_VOICE",
+        "input": {
+          "name": "Default voice",
+          "type": "string",
+          "description": "Voice used when a request omits 'voice'. Any Kokoro voice id or OpenAI alias works per request.",
+          "options": [
+            {
+              "label": "af_heart — US female (A, default)",
+              "value": "af_heart"
+            },
+            {
+              "label": "af_bella — US female (A-)",
+              "value": "af_bella"
+            },
+            {
+              "label": "af_nicole — US female (B-)",
+              "value": "af_nicole"
+            },
+            {
+              "label": "am_michael — US male (C+)",
+              "value": "am_michael"
+            },
+            {
+              "label": "am_fenrir — US male (C+)",
+              "value": "am_fenrir"
+            },
+            {
+              "label": "bf_emma — UK female (B-)",
+              "value": "bf_emma"
+            },
+            {
+              "label": "bm_george — UK male (C)",
+              "value": "bm_george"
+            },
+            {
+              "label": "ef_dora — Spanish female",
+              "value": "ef_dora"
+            },
+            {
+              "label": "ff_siwis — French female",
+              "value": "ff_siwis"
+            },
+            {
+              "label": "if_sara — Italian female",
+              "value": "if_sara"
+            },
+            {
+              "label": "pf_dora — Portuguese (BR) female",
+              "value": "pf_dora"
+            },
+            {
+              "label": "hf_alpha — Hindi female",
+              "value": "hf_alpha"
+            },
+            {
+              "label": "zf_xiaobei — Mandarin female",
+              "value": "zf_xiaobei"
+            }
+          ],
+          "default": "af_heart"
+        }
+      },
+      {
+        "key": "DEFAULT_RESPONSE_FORMAT",
+        "input": {
+          "name": "Default audio format",
+          "type": "string",
+          "description": "Format used when a request omits 'response_format'.",
+          "options": [
+            {
+              "label": "MP3",
+              "value": "mp3"
+            },
+            {
+              "label": "WAV",
+              "value": "wav"
+            },
+            {
+              "label": "FLAC",
+              "value": "flac"
+            },
+            {
+              "label": "OPUS",
+              "value": "opus"
+            },
+            {
+              "label": "PCM",
+              "value": "pcm"
+            }
+          ],
+          "default": "mp3"
+        }
+      },
+      {
+        "key": "MAX_INPUT_CHARS",
+        "input": {
+          "name": "Max input characters",
+          "type": "number",
+          "description": "Reject requests with longer 'input' (OpenAI limit is 4096).",
+          "min": 100,
+          "max": 20000,
+          "default": 4096,
+          "advanced": true
+        }
+      },
+      {
+        "key": "KOKORO_LANGS",
+        "input": {
+          "name": "Languages to load",
+          "type": "string",
+          "description": "Comma-separated Kokoro lang codes loaded at startup: a=US English, b=UK English, e=Spanish, f=French, h=Hindi, i=Italian, p=Portuguese (BR), z=Mandarin. Fewer languages = faster cold start.",
+          "default": "a,b,e,f,h,i,p,z",
+          "advanced": true
+        }
+      },
+      {
+        "key": "KOKORO_WARMUP",
+        "input": {
+          "type": "boolean",
+          "name": "Warm-up synthesis at startup",
+          "description": "Run one tiny synthesis before accepting jobs so the first request is fast.",
+          "default": true,
+          "trueValue": "1",
+          "falseValue": "0",
+          "advanced": true
+        }
+      }
+    ]
+  }
+}
