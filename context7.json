@@ -1,0 +1,14 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "Kokoro TTS Runpod Serverless worker",
+  "description": "Runpod Serverless worker for Kokoro-82M text-to-speech with an OpenAI-compatible /v1/audio/speech API. 54 voices in 8 languages, voice blending, mp3/wav/flac/opus/pcm output, model weights baked into the image.",
+  "excludeFolders": [
+    "tests",
+    "scripts",
+    "assets"
+  ],
+  "excludeFiles": [
+    "REPORT_ru.md",
+    "index.html"
+  ]
+}
